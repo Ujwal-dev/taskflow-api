@@ -22,10 +22,10 @@ public class TasksController : ControllerBase
     }
 
     // Reads the user's ID from the JWT claims
-    private Guid CurrentUserId =>
-        Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? User.FindFirstValue("sub")
-            ?? throw new UnauthorizedAccessException());
+    private string CurrentUserId =>
+    User.FindFirstValue(ClaimTypes.NameIdentifier)
+        ?? User.FindFirstValue("sub")
+        ?? throw new UnauthorizedAccessException();
 
     private bool IsAdmin => User.IsInRole("Admin");
 
@@ -57,8 +57,8 @@ public class TasksController : ControllerBase
     }
 
     // ── GET api/tasks/{id} ─────────────────────────────────────────────────────
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(Guid id)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(string id)
     {
         var task = await _db.Tasks.FindAsync(id);
 
@@ -96,8 +96,8 @@ public class TasksController : ControllerBase
     }
 
     // ── PUT api/tasks/{id} ─────────────────────────────────────────────────────
-    [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTaskRequest req)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(string id, [FromBody] UpdateTaskRequest req)
     {
         var task = await _db.Tasks.FindAsync(id);
 
@@ -130,8 +130,8 @@ public class TasksController : ControllerBase
     }
 
     // ── DELETE api/tasks/{id} ──────────────────────────────────────────────────
-    [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> Delete(Guid id)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(string id)
     {
         var task = await _db.Tasks.FindAsync(id);
 

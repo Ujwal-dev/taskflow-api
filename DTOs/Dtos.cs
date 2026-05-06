@@ -39,7 +39,7 @@ public record UpdateTaskRequest(
 );
 
 public record TaskResponse(
-    Guid Id,
+    string Id,
     string Title,
     string? Description,
     string Status,
@@ -47,7 +47,7 @@ public record TaskResponse(
     DateTime? DueDate,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    Guid UserId
+    string UserId
 );
 
 // ── Common ────────────────────────────────────────────────────────────────────

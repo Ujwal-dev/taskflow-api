@@ -2,7 +2,7 @@ namespace TaskFlowAPI.Models;
 
 public class TaskItem
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public TaskStatus Status { get; set; } = TaskStatus.Todo;
@@ -12,7 +12,7 @@ public class TaskItem
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Foreign key
-    public Guid UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
     public User User { get; set; } = null!;
 }
 

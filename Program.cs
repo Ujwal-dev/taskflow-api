@@ -23,16 +23,39 @@ var builder = WebApplication.CreateBuilder(args);
 // builder.Services.AddApplicationInsightsTelemetry();
 
 // ── 3. Database ───────────────────────────────────────────────────────────────
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sql => sql.EnableRetryOnFailure(
-            maxRetryCount:       5,
-            maxRetryDelay:       TimeSpan.FromSeconds(10),
-            errorNumbersToAdd:   null
-        )
-    )
-);
+// builder.Services.AddDbContext<AppDbContext>(options =>
+//     options.UseSqlServer(
+//         builder.Configuration.GetConnectionString("DefaultConnection"),
+//         sql => sql.EnableRetryOnFailure(
+//             maxRetryCount:       5,
+//             maxRetryDelay:       TimeSpan.FromSeconds(10),
+//             errorNumbersToAdd:   null
+//         )
+//     )
+// );
+
+// ── 3. Database ───────────────────────────────────────────────────────────────
+var isDevelopment = builder.Environment.IsDevelopment();
+
+if (isDevelopment)
+{
+    // SQLite for local dev — no SQL Server needed
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlite("Data Source=taskflow_local.db"));
+}
+else
+{
+    // Azure SQL for production
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("DefaultConnection"),
+            sql => sql.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null
+            )
+        ));
+}
 
 // ── 4. JWT Authentication ─────────────────────────────────────────────────────
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -127,9 +150,19 @@ var app = builder.Build();
 // ── 8. Auto-run EF migrations on startup ──────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning("DB migration skipped: {Message}", ex.Message);
+    }
 }
+
+
 
 // ── 9. Middleware pipeline ────────────────────────────────────────────────────
 app.UseMiddleware<ExceptionMiddleware>();

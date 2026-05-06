@@ -26,7 +26,6 @@ public class AppDbContext : DbContext
             e.Property(u => u.Role).HasConversion<string>();
         });
 
-        // ── TaskItem ──────────────────────────────────────────────────────────
         modelBuilder.Entity<TaskItem>(e =>
         {
             e.HasKey(t => t.Id);
@@ -35,11 +34,10 @@ public class AppDbContext : DbContext
             e.Property(t => t.Status).HasConversion<string>();
             e.Property(t => t.Priority).HasConversion<string>();
 
-            // Each task belongs to one user
             e.HasOne(t => t.User)
-             .WithMany(u => u.Tasks)
-             .HasForeignKey(t => t.UserId)
-             .OnDelete(DeleteBehavior.Cascade);
+            .WithMany(u => u.Tasks)
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
