@@ -150,4 +150,8 @@ app.UseAuthentication();               // Must come before UseAuthorization
 app.UseAuthorization();
 app.MapControllers();
 
+// ── Health check endpoint (used by Docker HEALTHCHECK + Azure App Service) ───
+app.MapGet("/health", () => Results.Ok(new { status = "Healthy", timestamp = DateTime.UtcNow }))
+   .WithTags("Health");
+
 app.Run();
